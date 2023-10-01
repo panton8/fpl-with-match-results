@@ -1,5 +1,4 @@
 package com.panton.domain
-import com.panton.domain.Status.Healthy
 
 final case class Player(
   id: Id,
@@ -7,6 +6,6 @@ final case class Player(
   surname: Name,
   price: Price,
   position: Position,
-  status: Status = Healthy,
+  isHealthy: Boolean = true,
   club: Club
 )

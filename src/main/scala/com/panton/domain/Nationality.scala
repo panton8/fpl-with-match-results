@@ -10,7 +10,7 @@ final case object Nationality extends Enum[Access] with DoobieEnum[Access] {
   final case object Austrian extends Nationality
   final case object Belgian extends Nationality
   final case object Brazilian extends Nationality
-  final case object Colombian extends Nationality
+  final case object Scottish extends Nationality
   final case object Croatian extends Nationality
   final case object Czech extends Nationality
   final case object Danish extends Nationality
@@ -21,7 +21,7 @@ final case object Nationality extends Enum[Access] with DoobieEnum[Access] {
   final case object Uruguayan extends Nationality
   final case object Welsh extends Nationality
   final case object Spanish extends Nationality
-  final case object Ukrainian extends Nationality
+  final case object Portuguese extends Nationality
   final case object Irish extends Nationality
   final case object Greek extends Nationality
   final case object German extends Nationality
