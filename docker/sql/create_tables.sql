@@ -8,15 +8,34 @@ CREATE TABLE IF NOT EXISTS users (
      budget numeric NOT NULL
 );
 
+CREATE INDEX IF NOT EXISTS idx_users_email_password ON users (email, password);
+
+--Managers
+CREATE TABLE IF NOT EXISTS managers(
+    id serial NOT NULL PRIMARY KEY,
+    name varchar NOT NULL,
+    surname varchar NOT NULL,
+    nationality varchar NOT NULl,
+    age int NOT NULL
+);
+
+--Clubs
+CREATE TABLE IF NOT EXISTS clubs(
+    name varchar NOT NULL PRIMARY KEY ,
+    founded date NOT NULL,
+    stadium varchar NOT NULL,
+    manager_id serial NOT NULL REFERENCES managers (id)
+);
+
 --Players
 CREATE TABLE IF NOT EXISTS players (
    id serial NOT NULL PRIMARY KEY,
    name varchar NOT NULL,
    surname varchar NOT NULL,
-   club serial NOT NULL REFERENCES clubs (id),
+   club varchar NOT NULL REFERENCES clubs (name),
    price numeric NOT NULL,
    pos char(3) NOT NULL,
-   health_status varchar NOT NULL
+   is_healthy boolean NOT NULL
 );
 
 --Teams
@@ -32,12 +51,13 @@ CREATE TABLE IF NOT EXISTS teams (
 CREATE TABLE IF NOT EXISTS teams_players (
     team_id serial NOT NULL REFERENCES teams (id),
     player_id serial NOT NULL REFERENCES players (id),
-    player_role varchar NOT NULL,
-    player_place varchar NOT NULL
+    is_captain boolean NOT NULL,
+    is_starter boolean NOT NULL
 );
 
 ALTER TABLE teams_players
-    ADD CONSTRAINT teams_players_connection PRIMARY KEY (team_id, player_id);
+    ADD CONSTRAINT teams_players_connection PRIMARY KEY (player_id, team_id);
+CREATE INDEX IF NOT EXISTS idx_teams_players_team_id ON teams_players (team_id);
 
 -- Statistics
 CREATE TABLE IF NOT EXISTS statistics(
@@ -56,25 +76,7 @@ CREATE TABLE IF NOT EXISTS statistics(
 ALTER TABLE statistics
     ADD CONSTRAINT statistics_connection PRIMARY KEY (game_week, player_id);
 
---Clubs
-CREATE TABLE IF NOT EXISTS clubs(
-    id serial NOT NULL PRIMARY KEY,
-    name varchar NOT NULL,
-    founded date NOT NULL,
-    stadium varchar NOT NULL,
-    manager serial NOT NULL REFERENCES managers (id)
-);
-
---Managers
-CREATE TABLE IF NOT EXISTS managers(
-    id serial NOT NULL PRIMARY KEY,
-    name varchar NOT NULL,
-    surname varchar NOT NULL,
-    nationality varchar NOT NULl,
-    age int NOT NULL
-);
-
---Managers
+--Referees
 CREATE TABLE IF NOT EXISTS referees(
     id serial NOT NULL PRIMARY KEY,
     name varchar NOT NULL,
@@ -88,18 +90,23 @@ CREATE TABLE IF NOT EXISTS matches(
     id serial NOT NULL PRIMARY KEY,
     date date NOT NULL,
     time time NOT NULL,
-    home_club_id serial NOT NULL REFERENCES clubs (id),
-    guest_club_id serial NOT NULL REFERENCES clubs (id),
-    home_club_goals int NOT NULL,
-    guest_club_goals int NOT NULL,
+    home_club varchar NOT NULL REFERENCES clubs (name),
+    guest_club varchar NOT NULL REFERENCES clubs (name),
+    home_club_goals int,
+    guest_club_goals int,
     referee_id serial NOT NULL REFERENCES referees (id)
 );
 
+CREATE INDEX IF NOT EXISTS idx_matches_date ON matches (date);
+CREATE INDEX IF NOT EXISTS idx_matches_home_club ON matches (home_club);
+CREATE INDEX IF NOT EXISTS idx_matches_guest_club ON matches (guest_club);
+
 --Table
 CREATE TABLE IF NOT EXISTS clubs_stat(
-  club_id serial NOT NULL PRIMARY KEY REFERENCES clubs (id),
+  club varchar NOT NULL PRIMARY KEY REFERENCES clubs (name),
   played int NOT NULL,
   wins int NOT NULL,
+  draws int NOT NULL,
   losses int NOT NULL,
   goals_for int NOT NULL,
   goals_against int NOT NULL,
