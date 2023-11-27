@@ -82,7 +82,8 @@ CREATE TABLE IF NOT EXISTS referees(
     name varchar NOT NULL,
     surname varchar NOT NULL,
     nationality varchar NOT NULl,
-    age int NOT NULL
+    age int NOT NULL,
+    appointments int NOT NULL
 );
 
 --Matches

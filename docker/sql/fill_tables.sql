@@ -202,20 +202,20 @@ VALUES
 
 
 --Referees
-INSERT INTO referees (id, name, surname, nationality, age)
+INSERT INTO referees (id, name, surname, nationality, age, appointments)
 VALUES
-    (1, 'Michael', 'Oliver', 'English', 38),
-    (2, 'Anthony', 'Taylor', 'English', 44),
-    (3, 'Craig', 'Pawson', 'English', 44),
-    (4, 'Chris', 'Kavanagh', 'English', 38),
-    (5, 'Darren', 'England', 'English', 37),
-    (6, 'Paul', 'Tierney', 'English', 42),
-    (7, 'Simon', 'Hooper', 'English', 41),
-    (8, 'David', 'Coote', 'English', 36),
-    (9, 'Andrew', 'Madley', 'English', 40),
-    (10, 'Stuart', 'Attwell', 'English', 40),
-    (11, 'Robert', 'Jones', 'English', 39),
-    (12, 'Darren', 'Bond', 'English', 35);
+    (1, 'Michael', 'Oliver', 'English', 38, 0),
+    (2, 'Anthony', 'Taylor', 'English', 44, 0),
+    (3, 'Craig', 'Pawson', 'English', 44, 0),
+    (4, 'Chris', 'Kavanagh', 'English', 38, 0),
+    (5, 'Darren', 'England', 'English', 37, 0),
+    (6, 'Paul', 'Tierney', 'English', 42, 0),
+    (7, 'Simon', 'Hooper', 'English', 41, 0),
+    (8, 'David', 'Coote', 'English', 36, 0),
+    (9, 'Andrew', 'Madley', 'English', 40, 0),
+    (10, 'Stuart', 'Attwell', 'English', 40, 0),
+    (11, 'Robert', 'Jones', 'English', 39, 0),
+    (12, 'Darren', 'Bond', 'English', 35, 0);
 
 --Matches
 INSERT INTO matches (id, date, time, home_club, guest_club, home_club_goals, guest_club_goals, referee_id)
@@ -287,3 +287,60 @@ VALUES
     ('Arsenal', 6, 4, 2, 0, 11, 6, 5, 14),
     ('Chelsea', 6, 1, 2, 3, 5, 6, -1, 5),
     ('Wolverhampton', 6, 1, 1, 4, 6, 12, -6, 4);
+
+
+INSERT INTO teams (id, name, points, available_transfers, user_id)
+VALUES
+    (1, 'adminTeam', 0, 2, 1),
+    (2, 'ChelseaFan', 0, 2, 2),
+    (3, 'dreamFC', 0, 2, 3);
+
+INSERT INTO teams_players (team_id, player_id, is_captain,is_starter)
+VALUES
+    (1, 16, false, true),
+    (1, 46, false, false),
+    (1, 2, false, true),
+    (1, 29, false, true),
+    (1, 18, false, false),
+    (1, 44, false, true),
+    (1, 17, false, false),
+    (1, 28, false, false),
+    (1, 7, false, true),
+    (1, 37, false, true),
+    (1, 9, false, true),
+    (1, 5, false, true),
+    (1, 3, false, true),
+    (1, 62, true, true),
+    (1, 27, false, true),
+-------------------
+    (2, 13, false, true),
+    (2, 15, false, false),
+    (2, 11, false, true),
+    (2, 30, false, true),
+    (2, 20, false, true),
+    (2, 45, false, true),
+    (2, 39, false, false),
+    (2, 14, false, false),
+    (2, 35, false, false),
+    (2, 38, false, true),
+    (2, 36, false, true),
+    (2, 22, false, true),
+    (2, 3, true, true),
+    (2, 59, false, true),
+    (2, 63, false, true),
+-------------------
+    (3, 47, false,false),
+    (3, 52, false, true),
+    (3, 12, true, true),
+    (3, 31, false, true),
+    (3, 19, false, false),
+    (3, 65, false, true),
+    (3, 21, false, false),
+    (3, 23, false, true),
+    (3, 8, false,true),
+    (3, 54, false, true),
+    (3, 25, false, true),
+    (3, 24, false, true),
+    (3, 3, false, true),
+    (3, 60, false, false),
+    (3, 26, false, true);
