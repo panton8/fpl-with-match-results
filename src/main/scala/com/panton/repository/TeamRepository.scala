@@ -7,7 +7,7 @@ import com.panton.repository.utils.DriverTransactor.xa
 import doobie.util.update.Update
 import doobie.implicits.toSqlInterpolator
 import cats.data.NonEmptyList
-import com.panton.repository.domain.TeamConnection
+import com.panton.repository.domain.{PlayerConnection, TeamConnection}
 import doobie._
 
 object TeamRepository {
@@ -190,7 +190,10 @@ object TeamRepository {
             teams
         SET
             points = ${currPoints.value + weekPoints.value},
-            available_transfers = ${if (transfers.value == 2) 2 else transfers.value + 1}
+            available_transfers = CASE
+                WHEN ${transfers.value == 2} THEN ${2}
+                ELSE ${transfers.value + 1}
+            END
         WHERE
             id = ${teamId.value}
       """
@@ -212,7 +215,7 @@ object TeamRepository {
       .run
       .transact(xa)
 
-  def playersFromTeam(teamId: Id): IO[List[Player]] =
+  def playersFromTeam(teamId: Id): IO[List[PlayerConnection]] =
     fr"""
         SELECT
             p.id AS player_id,
@@ -221,7 +224,9 @@ object TeamRepository {
             p.club,
             p.price,
             p.pos,
-            p.is_healthy
+            p.is_healthy,
+            tp.is_captain,
+            tp.is_starter
         FROM
             teams t
             INNER JOIN teams_players tp ON t.id = tp.team_id
@@ -229,10 +234,40 @@ object TeamRepository {
         WHERE
             t.id = ${teamId.value}
       """
-      .query[Player]
+      .query[PlayerConnection]
       .stream
       .compile
       .toList
+      .transact(xa)
+
+  def teamByName(name: Name): IO[Option[Team]] =
+    fr"""
+          SELECT
+              id,
+              name,
+              points,
+              available_transfers
+          FROM
+              teams
+          WHERE
+              name = ${name.value}
+        """
+      .query[Team]
+      .option
+      .transact(xa)
+
+  def getRole(playerId: Id, teamId: Id): IO[Option[Boolean]] =
+    fr"""
+          SELECT
+              is_captain
+          FROM
+              teams_players
+          WHERE
+              team_id = ${teamId.value}
+              AND player_id = ${playerId.value}
+        """
+      .query[Boolean]
+      .option
       .transact(xa)
 
   def teamPoints(teamId: Id, gameWeek: GameWeek): IO[Team] = {
@@ -294,6 +329,21 @@ object TeamRepository {
       )
       .transact(xa)
   }
+
+  def getGamePlace(playerId: Id, teamId: Id): IO[Option[Boolean]] =
+    fr"""
+         SELECT
+             is_starter
+         FROM
+             teams_players
+         WHERE
+             team_id = ${teamId.value}
+             AND player_id = ${playerId.value}
+       """
+      .query[Boolean]
+      .option
+      .transact(xa)
+
 
   def deleteTeamPlayers(teamId: Id): IO[Int] =
     fr"""

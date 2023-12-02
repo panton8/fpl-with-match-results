@@ -1,11 +1,15 @@
 package com.panton.repository
 
+import cats.data.NonEmptyList
 import cats.effect.IO
 import doobie.implicits._
-import com.panton.repository.utils.DriverTransactor.xa
-import com.panton.domain.{GameWeek, Id, Name, Player, Position, Price, Statistic}
+import utils.DriverTransactor.xa
+import com.panton.domain.{Club, GameWeek, Id, Name, Player, Position, Price, Statistic}
+import com.panton.repository.domain.TopAction
+import doobie.Fragments
+import doobie.implicits.toSqlInterpolator
 
-class PlayerRepository {
+object PlayerRepository {
 
   def listOfPlayers: IO[List[Player]] =
     fr"""
@@ -190,6 +194,57 @@ class PlayerRepository {
       .option
       .transact(xa)
 
+  def getTheBestTopScorers: IO[List[TopAction]] =
+    fr"""
+        SELECT
+            players.name, players.surname, players.club, players.pos, SUM(statistics.goals) as total_goals
+        FROM
+            players
+        JOIN statistics ON players.id = statistics.player_id
+        GROUP BY
+            players.name, players.surname, players.club, players.pos
+        ORDER BY
+            total_goals DESC
+      """
+      .query[TopAction]
+      .to[List]
+      .transact(xa)
+
+  def getTheBestTopAssistans: IO[List[TopAction]] =
+    fr"""
+        SELECT
+            players.name, players.surname, players.club, players.pos, SUM(statistics.assists) as total_assists
+        FROM
+            players
+        JOIN statistics ON players.id = statistics.player_id
+        GROUP BY
+            players.name, players.surname, players.club, players.pos
+        ORDER BY
+            total_assists DESC
+      """
+      .query[TopAction]
+      .to[List]
+      .transact(xa)
+
+  def getTheBestTopGoalkeepers: IO[List[TopAction]] =
+    fr"""
+        SELECT
+            players.name, players.surname, players.club, players.pos, SUM(statistics.clean_sheet) as total_clean_sheets
+        FROM
+            players
+        JOIN statistics ON players.id = statistics.player_id
+        WHERE
+            players.pos = 'GKP'
+        GROUP BY
+            players.name, players.surname, players.club, players.pos
+        ORDER BY
+            total_clean_sheets DESC
+      """
+      .query[TopAction]
+      .to[List]
+      .transact(xa)
+
+
   def deletePlayer(playerId: Id): IO[Int] =
     fr"""
          DELETE FROM
@@ -210,8 +265,7 @@ class PlayerRepository {
                    club,
                    price,
                    pos,
-                   health_status,
-                   game_place
+                   is_healthy
                )
       VALUES
           (
@@ -225,4 +279,59 @@ class PlayerRepository {
         """
       .update.withUniqueGeneratedKeys[Int]("id")
       .transact(xa)
+
+  def playersPos(players: NonEmptyList[Id]): IO[List[Position]] = {
+    val q =
+      fr"""
+         SELECT
+             pos
+         FROM
+             players
+         WHERE
+       """ ++ Fragments.in(fr"id", players.map(id => id.value))
+    q.query[Position]
+      .stream
+      .compile
+      .toList
+      .transact(xa)
+  }
+
+  def playerPos(player: Id): IO[Option[Position]] =
+    fr"""
+        SELECT
+            pos
+        FROM
+            players
+        WHERE
+            id = ${player.value}
+      """
+      .query[Position]
+      .option
+      .transact(xa)
+
+  def getPlayersClubs: IO[List[Name]] =
+    fr"""
+        SELECT
+            name
+        FROM
+            clubs
+      """
+      .query[Name]
+      .stream
+      .compile
+      .toList
+      .transact(xa)
 }
+
+//object AppRunner extends IOApp {
+//  implicit class Debugger[A](io: IO[A]) {
+//    def debug: IO[A] = io.map { a =>
+//      println(s"[${Thread.currentThread().getName}] $a")
+//      a
+//    }
+//  }
+//
+//  override def run(args: List[String]): IO[ExitCode] = {
+//   PlayerRepository. addPlayer(Name("Миша"), Name("Мудрик"), Price(6.7), Name("Chelsea"), Position.Midfielder, true).debug().as(ExitCode.Success)
+//  }
+//}

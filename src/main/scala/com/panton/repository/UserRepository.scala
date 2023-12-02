@@ -15,7 +15,7 @@ object UserRepository {
              user_name,
              email,
              password,
-             role,
+             access,
              budget
          FROM
              users
@@ -28,7 +28,7 @@ object UserRepository {
   def addUser(userName: Name, email: Email, password: Password, access: Access = Base): IO[Int] =
     fr"""
         INSERT INTO
-            users (user_name, email, password, role, budget)
+            users (user_name, email, password, access, budget)
         VALUES
             (${userName.value}, ${email.value}, ${password.value}, $access, ${100})
       """
@@ -85,5 +85,44 @@ object UserRepository {
      """
       .update
       .run
+      .transact(xa)
+
+  def userByName(name: Name): IO[Option[User]] =
+    fr"""
+          SELECT
+              *
+          FROM
+              users
+          WHERE
+              user_name=${name.value}
+        """
+      .query[User]
+      .option
+      .transact(xa)
+
+  def userByEmail(email: Email): IO[Option[User]] =
+    fr"""
+          SELECT
+              *
+          FROM
+              users
+          WHERE
+              email = ${email.value}
+        """
+      .query[User]
+      .option
+      .transact(xa)
+
+  def userById(id: Id): IO[Option[User]] =
+    fr"""
+           SELECT
+               *
+           FROM
+               users
+           WHERE
+               id = ${id.value}
+         """
+      .query[User]
+      .option
       .transact(xa)
 }

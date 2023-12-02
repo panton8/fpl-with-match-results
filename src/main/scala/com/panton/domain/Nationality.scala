@@ -3,7 +3,7 @@ import enumeratum._
 
 sealed trait Nationality extends EnumEntry
 
-final case object Nationality extends Enum[Access] with DoobieEnum[Access] {
+final case object Nationality extends Enum[Nationality] with DoobieEnum[Nationality] {
 
   final case object Argentinian extends Nationality
   final case object Australian extends Nationality

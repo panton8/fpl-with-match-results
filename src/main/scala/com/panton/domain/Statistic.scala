@@ -1,5 +1,8 @@
 package com.panton.domain
 
+import io.circe.syntax.EncoderOps
+import io.circe.{Decoder, Encoder, Json}
+
 final case class Statistic(
     goals:Int,
     assists: Int,
@@ -12,6 +15,32 @@ final case class Statistic(
 )
 
 object Statistic {
+
+  implicit val jsonDecoder: Decoder[Statistic] = cursor =>
+    for {
+      goals <- cursor.get[Int]("goals")
+      assists <- cursor.get[Int]("assists")
+      minutes <- cursor.get[Int]("minutes")
+      ownGoals <- cursor.get[Int]("ownGoals")
+      yellowCard <- cursor.get[Int]("yellowCards")
+      redCard <- cursor.get[Int]("redCards")
+      saves <- cursor.get[Int]("saves")
+      cleanSheet <- cursor.get[Int]("cleanSheets")
+    } yield Statistic(goals, assists, minutes, ownGoals, yellowCard, redCard, saves, cleanSheet)
+
+  implicit val jsonEncoder: Encoder[Statistic] = Encoder.instance {
+    case Statistic(goals, assists, minutes, ownGoals, yellowCard, redCard, saves, cleanSheet) => Json.obj(
+      "goals" -> goals.asJson,
+      "assists" -> assists.asJson,
+      "minutes" -> minutes.asJson,
+      "ownGoals" -> ownGoals.asJson,
+      "yellowCards" -> yellowCard.asJson,
+      "redCards" -> redCard.asJson,
+      "saves" -> saves.asJson,
+      "cleanSheets" -> cleanSheet.asJson
+    )
+  }
+
   def countPoints(statistic: Statistic, position: Position, isStarter: Boolean = true, isCaptain: Boolean = false): Int = {
     val points = Goal.points(statistic.goals, position).value +
       Assist.points(statistic.assists, position).value +
