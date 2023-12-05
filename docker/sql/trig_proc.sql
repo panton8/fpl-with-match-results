@@ -86,10 +86,15 @@ CREATE OR REPLACE FUNCTION insert_match_without_goals(
     p_guest_club VARCHAR,
     p_referee_id INT
 )
-    RETURNS VOID AS $$
+    RETURNS INT AS $$
+DECLARE
+    inserted_id INT;
 BEGIN
     INSERT INTO matches (date, time, home_club, guest_club, referee_id)
-    VALUES (p_date, p_time, p_home_club, p_guest_club, p_referee_id);
+    VALUES (p_date, p_time, p_home_club, p_guest_club, p_referee_id)
+    RETURNING id INTO inserted_id;
+
+    RETURN inserted_id;
 END;
 $$ LANGUAGE plpgsql;
 

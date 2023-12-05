@@ -7,7 +7,6 @@ import io.circe.{Decoder, Encoder, Json}
 import java.sql.Date
 
 final case class Club(
-  id: Id,
   name: Name,
   founded: Date,
   stadium: Name,
@@ -18,13 +17,11 @@ object Club {
 
   implicit val jsonDecoder: Decoder[Club] = cursor =>
     for {
-      id      <- cursor.get[Int]("id")
       name    <- cursor.get[String]("name")
       founded <- cursor.get[String]("founded")
       stadium <- cursor.get[String]("stadium")
       manager <- cursor.get[String]("manager")
     } yield Club(
-      Id(id),
       Name(name),
       Date.valueOf(founded),
       Name(stadium),
@@ -32,8 +29,7 @@ object Club {
     )
 
   implicit val jsonEncoder: Encoder[Club] = Encoder.instance {
-    case Club(id, name, founded, stadium, manager) => Json.obj(
-      "id" -> id.value.asJson,
+    case Club(name, founded, stadium, manager) => Json.obj(
       "name"      -> name.value.asJson,
       "founded"   -> founded.toString.asJson,
       "stadium"   -> stadium.value.asJson,
@@ -41,10 +37,9 @@ object Club {
     )
   }
 
-  implicit val clubRead: Read[Club] = Read[(Int, String, String, String, String)].map {
-    case (id, name, founded, stadium, manager) =>
+  implicit val clubRead: Read[Club] = Read[(String, String, String, String)].map {
+    case (name, founded, stadium, manager) =>
       Club(
-        Id(id),
         Name(name),
         Date.valueOf(founded),
         Name(stadium),
@@ -52,10 +47,9 @@ object Club {
       )
   }
 
-  implicit val clubWrite: Write[Club] = Write[(Int, String, String, String, String)].
+  implicit val clubWrite: Write[Club] = Write[(String, String, String, String)].
     contramap { club =>
       (
-        club.id.value,
         club.name.value,
         club.founded.toString,
         club.stadium.value,

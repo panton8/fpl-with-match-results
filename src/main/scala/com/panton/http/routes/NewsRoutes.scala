@@ -5,7 +5,7 @@ import cats.implicits.toSemigroupKOps
 import com.panton.domain.Access.{Admin, Base}
 import com.panton.domain.{Id, News, User}
 import com.panton.http.auth.Auth.authMiddleware
-import com.panton.service.{NewsService, UserService}
+import com.panton.service.NewsService
 import org.http4s.dsl.impl.IntVar
 import org.http4s.{AuthedRoutes, HttpRoutes, Response}
 import org.http4s._
